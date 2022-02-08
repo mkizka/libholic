@@ -1,3 +1,5 @@
+import { RateLimit, requestGraphql } from "../graphql";
+import { flatten } from "../helper";
 import { getDependenciesPackage, getDependenciesLock } from "./npm";
 import { getDependenciesPnpm } from "./pnpm";
 import { getDependenciesYarn } from "./yarn";
@@ -17,14 +19,30 @@ function getDependencies(filename: string, text: string) {
 }
 
 export function getDependenciesAll(filename: string, texts: string[]) {
-  return texts.reduce((result, text) => {
-    const deps = getDependencies(filename, text) || [];
-    result.push(...deps);
-    return result;
-  }, [] as string[]);
+  const dependenciesPerText = texts.map(
+    (text) => getDependencies(filename, text) || []
+  );
+  return flatten(dependenciesPerText);
 }
 
 export function getTargetFilenames(lockfile: boolean) {
   const [pkgfile, ...lockfiles] = Object.keys(getters);
   return lockfile ? lockfiles : [pkgfile];
+}
+
+export async function getDependenciesUser(login: string) {
+  const rateLimits: RateLimit[] = [];
+  const promises = getTargetFilenames(true).map(async (filename) => {
+    const { rateLimit, texts } = await requestGraphql({ login, filename });
+    rateLimits.push(rateLimit);
+    return getDependenciesAll(
+      filename,
+      texts.filter((text): text is string => text != null)
+    );
+  });
+  const dependenciesPerFilename = await Promise.all(promises);
+  return {
+    dependencies: flatten(dependenciesPerFilename),
+    rateLimit: rateLimits.sort((a, b) => a.remaining - b.remaining)[0],
+  };
 }

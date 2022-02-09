@@ -1,31 +1,35 @@
-import { Button } from "@mantine/core";
+import { AppShell, Button, Header, TextInput } from "@mantine/core";
+import { useState } from "react";
+import { ActionFunction, Form, redirect } from "remix";
 
-export default function Index() {
+export const action: ActionFunction = async ({ request }) => {
+  const body = await request.formData();
+  return redirect(`/${body.get("name")}`);
+};
+
+export default function () {
+  const [loading, setLoading] = useState(false);
   return (
-    <Button
-      component="a"
-      target="_blank"
-      rel="noopener noreferrer"
-      href="https://twitter.com/mantinedev"
+    <AppShell
+      padding="md"
+      header={
+        <Header height={60} padding="xs">
+          libholic
+        </Header>
+      }
       styles={(theme) => ({
-        root: {
-          backgroundColor: "#00acee",
-          border: 0,
-          height: 42,
-          paddingLeft: 20,
-          paddingRight: 20,
-
-          "&:hover": {
-            backgroundColor: theme.fn.darken("#00acee", 0.05),
-          },
-        },
-
-        leftIcon: {
-          marginRight: 15,
+        main: {
+          backgroundColor: theme.colors.gray[0],
+          height: "100vh",
         },
       })}
     >
-      Follow on Twitter
-    </Button>
+      <Form method="post" onSubmit={() => setLoading(true)}>
+        <TextInput name="name" label="ユーザー名" required />
+        <Button type="submit" loading={loading}>
+          結果を見てみる
+        </Button>
+      </Form>
+    </AppShell>
   );
 }

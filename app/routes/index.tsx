@@ -1,6 +1,13 @@
-import { AppShell, Button, Header, TextInput } from "@mantine/core";
+import {
+  AppShell,
+  Button,
+  Header,
+  TextInput,
+  Text,
+  Group,
+} from "@mantine/core";
 import { useState } from "react";
-import { ActionFunction, Form, redirect } from "remix";
+import { Link, ActionFunction, Form, redirect } from "remix";
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
@@ -13,21 +20,81 @@ export default function () {
     <AppShell
       padding="md"
       header={
-        <Header height={60} padding="xs">
-          libholic
+        <Header height="" padding="xs">
+          <Text
+            component={Link}
+            to="/"
+            styles={{
+              root: {
+                fontSize: "2rem",
+                fontWeight: 800,
+                color: "initial",
+                textDecoration: "none",
+              },
+            }}
+          >
+            pkgholic
+          </Text>
         </Header>
       }
-      styles={(theme) => ({
-        main: {
-          backgroundColor: theme.colors.gray[0],
+      styles={{
+        root: {
           height: "100vh",
+          maxWidth: 500,
+          margin: "auto",
+          display: "flex",
+          flexDirection: "column",
+          textAlign: "center",
         },
-      })}
+        body: {
+          flex: 1,
+        },
+      }}
     >
+      <Text>最近使ったnpmパッケージ一覧をランキング形式で表示します。</Text>
       <Form method="post" onSubmit={() => setLoading(true)}>
-        <TextInput name="name" label="ユーザー名" required />
-        <Button type="submit" loading={loading}>
-          結果を見てみる
+        <Group
+          styles={{
+            root: {
+              justifyContent: "center",
+              gap: 4,
+              margin: "auto",
+            },
+          }}
+        >
+          <Text
+            styles={{
+              root: {
+                fontSize: "1.2rem",
+                marginTop: "auto",
+                marginBottom: 5,
+              },
+            }}
+          >
+            https://github.com/
+          </Text>
+          <TextInput
+            name="name"
+            label="ユーザー名"
+            required
+            styles={{
+              root: {
+                width: 200,
+              },
+            }}
+          />
+        </Group>
+        <Button
+          type="submit"
+          loading={loading}
+          size="lg"
+          styles={{
+            root: {
+              marginTop: 10,
+            },
+          }}
+        >
+          結果を見る
         </Button>
       </Form>
     </AppShell>

@@ -9,6 +9,8 @@ import {
 import type { MetaFunction } from "remix";
 import { Global } from "@mantine/core";
 
+import { Layout } from "~/components/Layout";
+
 export const meta: MetaFunction = () => {
   return { title: "New Remix App" };
 };
@@ -30,7 +32,9 @@ export default function App() {
         />
       </head>
       <body>
-        <Outlet />
+        <Layout>
+          <Outlet />
+        </Layout>
         <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === "development" && <LiveReload />}

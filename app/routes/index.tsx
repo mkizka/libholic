@@ -1,13 +1,6 @@
-import {
-  AppShell,
-  Button,
-  Header,
-  TextInput,
-  Text,
-  Group,
-} from "@mantine/core";
+import { Button, TextInput, Text, Group } from "@mantine/core";
 import { useState } from "react";
-import { Link, ActionFunction, Form, redirect } from "remix";
+import { ActionFunction, Form, redirect } from "remix";
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
@@ -17,40 +10,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function () {
   const [loading, setLoading] = useState(false);
   return (
-    <AppShell
-      padding="md"
-      header={
-        <Header height="" padding="xs">
-          <Text
-            component={Link}
-            to="/"
-            styles={{
-              root: {
-                fontSize: "2rem",
-                fontWeight: 800,
-                color: "initial",
-                textDecoration: "none",
-              },
-            }}
-          >
-            pkgholic
-          </Text>
-        </Header>
-      }
-      styles={{
-        root: {
-          height: "100vh",
-          maxWidth: 500,
-          margin: "auto",
-          display: "flex",
-          flexDirection: "column",
-          textAlign: "center",
-        },
-        body: {
-          flex: 1,
-        },
-      }}
-    >
+    <>
       <Text>最近使ったnpmパッケージ一覧をランキング形式で表示します。</Text>
       <Form method="post" onSubmit={() => setLoading(true)}>
         <Group
@@ -97,6 +57,6 @@ export default function () {
           結果を見る
         </Button>
       </Form>
-    </AppShell>
+    </>
   );
 }

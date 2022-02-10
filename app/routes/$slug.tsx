@@ -1,4 +1,4 @@
-import { Card, Group, Text, Button, Badge, SimpleGrid } from "@mantine/core";
+import { Group, Text, Button, Badge, SimpleGrid, Paper } from "@mantine/core";
 import {
   HeadersFunction,
   json,
@@ -43,16 +43,9 @@ export default function Index() {
   const { rateLimit, pkgs } = useLoaderData<Data>();
   console.info(rateLimit);
   return (
-    <SimpleGrid
-      cols={4}
-      breakpoints={[
-        { maxWidth: "md", cols: 3 },
-        { maxWidth: "sm", cols: 2 },
-        { maxWidth: "xs", cols: 1 },
-      ]}
-    >
+    <SimpleGrid cols={1} spacing="sm">
       {pkgs.map((pkg) => (
-        <Card key={pkg.name} shadow="sm" padding="lg">
+        <Paper key={pkg.name} padding="sm" withBorder>
           <Group>
             <Badge color="green" variant="outline">
               {pkg.count}
@@ -65,10 +58,10 @@ export default function Index() {
               color="blue"
               style={{ marginLeft: "auto" }}
             >
-              Good First Issueを見てみる
+              Good First Issueを見る
             </Button>
           </Group>
-        </Card>
+        </Paper>
       ))}
     </SimpleGrid>
   );

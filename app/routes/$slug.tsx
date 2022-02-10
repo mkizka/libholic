@@ -1,12 +1,4 @@
-import {
-  Card,
-  Group,
-  Text,
-  Button,
-  useMantineTheme,
-  Badge,
-  SimpleGrid,
-} from "@mantine/core";
+import { Card, Group, Text, Button, Badge, SimpleGrid } from "@mantine/core";
 import {
   HeadersFunction,
   json,
@@ -17,6 +9,7 @@ import {
 import invariant from "tiny-invariant";
 
 import { getDependenciesUser } from "~/utils/dependencies";
+import { RateLimit } from "~/utils/graphql";
 import { aggregate } from "~/utils/helper";
 
 const cacheControl = {
@@ -25,6 +18,11 @@ const cacheControl = {
 
 export const headers: HeadersFunction = () => {
   return cacheControl;
+};
+
+type Data = {
+  pkgs: ReturnType<typeof aggregate>;
+  rateLimit: RateLimit;
 };
 
 export const loader: LoaderFunction = async ({ params }) => {
@@ -42,8 +40,7 @@ export const loader: LoaderFunction = async ({ params }) => {
 };
 
 export default function Index() {
-  const theme = useMantineTheme();
-  const { rateLimit, pkgs } = useLoaderData();
+  const { rateLimit, pkgs } = useLoaderData<Data>();
   console.info(rateLimit);
   return (
     <SimpleGrid
@@ -54,8 +51,8 @@ export default function Index() {
         { maxWidth: "xs", cols: 1 },
       ]}
     >
-      {pkgs.map((pkg: any) => (
-        <Card shadow="sm" padding="lg">
+      {pkgs.map((pkg) => (
+        <Card key={pkg.name} shadow="sm" padding="lg">
           <Group>
             <Badge color="green" variant="outline">
               {pkg.count}

@@ -4,7 +4,7 @@ import { ActionFunction, Form, redirect } from "remix";
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
-  return redirect(`/${body.get("name")}`);
+  return redirect(`/${body.get("name")}?s=${body.get("target")}`);
 };
 
 export default function () {
@@ -15,6 +15,7 @@ export default function () {
       <Form method="post" onSubmit={() => setLoading(true)}>
         <NativeSelect
           label="検索対象"
+          name="target"
           sx={{
             width: "fit-content",
             margin: "auto",

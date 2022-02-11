@@ -1,4 +1,4 @@
-import { Button, TextInput, Text, Group } from "@mantine/core";
+import { Button, TextInput, Text, Group, NativeSelect } from "@mantine/core";
 import { useState } from "react";
 import { ActionFunction, Form, redirect } from "remix";
 
@@ -13,22 +13,30 @@ export default function () {
     <>
       <Text>最近使ったnpmパッケージ一覧をランキング形式で表示します。</Text>
       <Form method="post" onSubmit={() => setLoading(true)}>
+        <NativeSelect
+          label="検索対象"
+          sx={{
+            width: "fit-content",
+            margin: "auto",
+          }}
+          data={[
+            { value: "package", label: "package.jsonから取得", selected: true },
+            { value: "lock", label: "lockファイル(npm/yarn/pnpm)から取得" },
+          ]}
+          required
+        />
         <Group
-          styles={{
-            root: {
-              justifyContent: "center",
-              gap: 4,
-              margin: "auto",
-            },
+          sx={{
+            justifyContent: "center",
+            gap: 4,
+            margin: "auto",
           }}
         >
           <Text
-            styles={{
-              root: {
-                fontSize: "1.2rem",
-                marginTop: "auto",
-                marginBottom: 5,
-              },
+            sx={{
+              fontSize: "1.2rem",
+              marginTop: "auto",
+              marginBottom: 5,
             }}
           >
             https://github.com/
@@ -37,10 +45,8 @@ export default function () {
             name="name"
             label="ユーザー名"
             required
-            styles={{
-              root: {
-                width: 200,
-              },
+            sx={{
+              width: 200,
             }}
           />
         </Group>
@@ -48,10 +54,8 @@ export default function () {
           type="submit"
           loading={loading}
           size="lg"
-          styles={{
-            root: {
-              marginTop: 10,
-            },
+          sx={{
+            marginTop: 10,
           }}
         >
           結果を見る

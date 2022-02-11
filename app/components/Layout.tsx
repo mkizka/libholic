@@ -10,13 +10,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Text
             component={Link}
             to="/"
-            styles={{
-              root: {
-                fontSize: "2rem",
-                fontWeight: 800,
-                color: "initial",
-                textDecoration: "none",
-              },
+            sx={{
+              fontSize: "2rem",
+              fontWeight: 800,
+              color: "initial",
+              textDecoration: "none",
             }}
           >
             pkgholic

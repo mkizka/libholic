@@ -30,9 +30,15 @@ export function getTargetFilenames(lockfile: boolean) {
   return lockfile ? lockfiles : [pkgfile];
 }
 
-export async function getDependenciesUser(login: string) {
+export async function getDependenciesUser({
+  login,
+  lockfile,
+}: {
+  login: string;
+  lockfile: boolean;
+}) {
   const rateLimits: RateLimit[] = [];
-  const promises = getTargetFilenames(true).map(async (filename) => {
+  const promises = getTargetFilenames(lockfile).map(async (filename) => {
     const { rateLimit, texts } = await requestGraphql({ login, filename });
     rateLimits.push(rateLimit);
     return getDependenciesAll(

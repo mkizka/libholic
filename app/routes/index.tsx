@@ -23,15 +23,20 @@ export default function () {
         <RadioGroup
           label="検索対象"
           name="target"
-          description="lockファイルは package-lock.json, yarn.lock, pnpm-lock.yaml が対象になります。"
+          description="lockファイル ... package-lock.json, yarn.lock, pnpm-lock.yaml"
           defaultValue="package"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
           required
         >
           <Radio value="package">package.json</Radio>
           <Radio value="lock">lockファイル</Radio>
         </RadioGroup>
         <Space h={30} />
-        <Group sx={{ gap: 4 }}>
+        <Group sx={{ gap: 4, justifyContent: "center" }}>
           <Text
             sx={{
               fontSize: "1.2rem",

@@ -10,14 +10,13 @@ import { PkgItem } from "~/components/PkgItem";
 
 import { getDependenciesUser } from "~/utils/dependencies";
 import { RateLimit } from "~/utils/graphql";
+import { cacheControl } from "~/utils/headers";
 import { aggregate } from "~/utils/helper";
 
-const cacheControl = {
-  "Cache-Control": "max-age=0, s-maxage=30, stale-while-revalidate=30",
-};
-
 export const headers: HeadersFunction = () => {
-  return cacheControl;
+  return {
+    ...cacheControl(30),
+  };
 };
 
 type Data = {
@@ -41,7 +40,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json(
     { rateLimit, pkgs },
     {
-      headers: cacheControl,
+      headers: {
+        ...cacheControl(30),
+      },
     }
   );
 };

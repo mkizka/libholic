@@ -4,9 +4,9 @@ import {
   json,
   Link,
   LoaderFunction,
+  redirect,
   useLoaderData,
 } from "remix";
-import invariant from "tiny-invariant";
 
 import { getDependenciesUser } from "~/utils/dependencies";
 import { RateLimit } from "~/utils/graphql";
@@ -25,9 +25,12 @@ type Data = {
   rateLimit: RateLimit;
 };
 
-export const loader: LoaderFunction = async ({ params }) => {
-  invariant(params.slug != undefined);
-  const { rateLimit, dependencies } = await getDependenciesUser(params.slug);
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = new URL(request.url).searchParams.get("user");
+  if (!user) {
+    return redirect("/");
+  }
+  const { rateLimit, dependencies } = await getDependenciesUser(user);
   const pkgs = aggregate(dependencies)
     .sort((a, b) => b.count - a.count)
     .slice(0, 30);
@@ -53,7 +56,7 @@ export default function Index() {
             <Text weight={500}>{pkg.name}</Text>
             <Button
               component={Link}
-              to={`/packages/${pkg.name}`}
+              to={`/packages?q=${encodeURIComponent(pkg.name)}`}
               variant="light"
               color="blue"
               style={{ marginLeft: "auto" }}

@@ -6,7 +6,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <AppShell
       padding="md"
       header={
-        <Header height="" padding="xs">
+        <Header height="" padding="xs" sx={{ textAlign: "center" }}>
           <Text
             component={Link}
             to="/"
@@ -28,7 +28,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           margin: "auto",
           display: "flex",
           flexDirection: "column",
-          textAlign: "center",
         },
         body: {
           flex: 1,

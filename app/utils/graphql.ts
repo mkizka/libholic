@@ -46,7 +46,7 @@ export async function requestGraphql({
             resetAt
           }
           user(login: $login) {
-            repositories(last: 20, isFork: false) {
+            repositories(last: 30, isFork: false) {
               nodes {
                 object(expression: $expression) {
                   ... on Blob {

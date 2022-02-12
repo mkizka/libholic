@@ -18,3 +18,11 @@ export function flatten<T>(array: T[][]) {
     return result;
   }, [] as T[]);
 }
+
+export function randomInt(max: number) {
+  return Math.floor(Math.random() * max + 1);
+}
+
+export function choice<T>(array: T[]) {
+  return array[randomInt(array.length - 1)];
+}

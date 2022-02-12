@@ -13,15 +13,16 @@ export function PkgItem({ name, count }: Props) {
           {count}
         </Badge>
         <Text weight={500}>{name}</Text>
-        <Button
+        {/* <Button
           component={Link}
           to={`/packages?q=${encodeURIComponent(name)}`}
+          target="_blank"
           variant="light"
           color="blue"
           style={{ marginLeft: "auto" }}
         >
           Good First Issueを見る
-        </Button>
+        </Button> */}
       </Group>
     </Paper>
   );

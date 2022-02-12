@@ -20,9 +20,8 @@ import { samplePkgNames } from "~/utils/fixtures";
 import { choice, randomInt } from "~/utils/helper";
 
 export const loader: LoaderFunction = () => {
-  const randomPkgs = [...Array(100)]
+  const randomPkgs = [...Array(3)]
     .map((_) => choice(samplePkgNames))
-    .slice(0, 3)
     .map((pkgName) => {
       return { name: pkgName, count: randomInt(15) };
     })

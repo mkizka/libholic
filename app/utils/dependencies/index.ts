@@ -1,33 +1,26 @@
-import { RateLimit, requestGraphql } from "../graphql";
+import { requestGraphql, RequestGraphqlResult } from "../graphql";
 import { flatten } from "../helper";
-import { getDependenciesPackage, getDependenciesLock } from "./npm";
-import { getDependenciesPnpm } from "./pnpm";
-import { getDependenciesYarn } from "./yarn";
+import { getTargets, getDependencies } from "./getters";
 
-const getters: Record<string, (text: string) => string[]> = {
-  "package.json": getDependenciesPackage,
-  "package-lock.json": getDependenciesLock,
-  "yarn.lock": getDependenciesYarn,
-  "pnpm-lock.yaml": getDependenciesPnpm,
-};
-
-function getDependencies(filename: string, text: string) {
-  if (filename in getters) {
-    return getters[filename](text);
-  }
-  return null;
+function fileToRepo(filename: string) {
+  return ({ repoUrl, content }: RequestGraphqlResult["files"][0]) => {
+    const data =
+      content != null
+        ? getDependencies(filename, content)
+        : { dependencies: [], error: "ファイルが見つかりませんでした" };
+    return {
+      filename,
+      url: repoUrl,
+      ...data,
+    };
+  };
 }
 
-export function getDependenciesAll(filename: string, texts: string[]) {
-  const dependenciesPerText = texts.map(
-    (text) => getDependencies(filename, text) || []
-  );
-  return flatten(dependenciesPerText);
-}
-
-export function getTargetFilenames(lockfile: boolean) {
-  const [pkgfile, ...lockfiles] = Object.keys(getters);
-  return lockfile ? lockfiles : [pkgfile];
+function targetToGraphqlResponse(login: string) {
+  return async (filename: string) => {
+    const { rateLimit, files } = await requestGraphql({ login, filename });
+    return { rateLimit, repos: files.map(fileToRepo(filename)) };
+  };
 }
 
 export async function getDependenciesUser({
@@ -37,18 +30,11 @@ export async function getDependenciesUser({
   login: string;
   lockfile: boolean;
 }) {
-  const rateLimits: RateLimit[] = [];
-  const promises = getTargetFilenames(lockfile).map(async (filename) => {
-    const { rateLimit, texts } = await requestGraphql({ login, filename });
-    rateLimits.push(rateLimit);
-    return getDependenciesAll(
-      filename,
-      texts.filter((text): text is string => text != null)
-    );
-  });
-  const dependenciesPerFilename = await Promise.all(promises);
-  return {
-    dependencies: flatten(dependenciesPerFilename),
-    rateLimit: rateLimits.sort((a, b) => a.remaining - b.remaining)[0],
-  };
+  const promises = getTargets(lockfile).map(targetToGraphqlResponse(login));
+  const responsePerTarget = await Promise.all(promises);
+  const repos = flatten(responsePerTarget.map((response) => response.repos));
+  const rateLimit = responsePerTarget.sort(
+    (a, b) => a.rateLimit.remaining - b.rateLimit.remaining
+  )[0].rateLimit;
+  return { repos, rateLimit };
 }

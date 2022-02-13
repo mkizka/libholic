@@ -30,21 +30,15 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (!user) {
     return redirect("/");
   }
-  const { rateLimit, dependencies } = await getDependenciesUser({
+  const a = await getDependenciesUser({
     login: user,
     lockfile: target == "lock",
   });
-  const pkgs = aggregate(dependencies)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 30);
-  return json(
-    { rateLimit, pkgs },
-    {
-      headers: {
-        ...cacheControl(30),
-      },
-    }
-  );
+  return json(a, {
+    headers: {
+      ...cacheControl(30),
+    },
+  });
 };
 
 export default function Index() {

@@ -1,6 +1,8 @@
 import { env } from "~/utils/env";
+import { PromiseType } from "./helper";
 
 type GraphqlResponseNode = {
+  url: string;
   object: {
     text: string;
   } | null;
@@ -48,6 +50,7 @@ export async function requestGraphql({
           user(login: $login) {
             repositories(last: 30, isFork: false) {
               nodes {
+                url
                 object(expression: $expression) {
                   ... on Blob {
                     text
@@ -70,8 +73,13 @@ export async function requestGraphql({
     },
   });
   const { rateLimit, user } = (await response.json()).data as GraphqlResponse;
-  const texts = user.repositories.nodes.map((node) =>
-    node.object != null ? node.object.text : null
-  );
-  return { rateLimit, texts };
+  const files = user.repositories.nodes.map((node) => {
+    return {
+      repoUrl: node.url,
+      content: node.object != null ? node.object.text : null,
+    };
+  });
+  return { rateLimit, files };
 }
+
+export type RequestGraphqlResult = PromiseType<typeof requestGraphql>;

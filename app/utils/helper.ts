@@ -26,3 +26,6 @@ export function randomInt(max: number) {
 export function choice<T>(array: T[]) {
   return array[randomInt(array.length - 1)];
 }
+
+export type PromiseType<T extends (...args: any[]) => void> =
+  ReturnType<T> extends Promise<infer U> ? U : never;

@@ -1,5 +1,4 @@
 import { requestGraphql, RequestGraphqlResult } from "../graphql";
-import { flatten } from "../helper";
 import { getTargets, getDependencies } from "./getters";
 
 function fileToRepo(filename: string) {
@@ -15,6 +14,8 @@ function fileToRepo(filename: string) {
     };
   };
 }
+
+export type Repo = ReturnType<ReturnType<typeof fileToRepo>>;
 
 function targetToGraphqlResponse(login: string) {
   return async (filename: string) => {
@@ -32,9 +33,35 @@ export async function getDependenciesUser({
 }) {
   const promises = getTargets(lockfile).map(targetToGraphqlResponse(login));
   const responsePerTarget = await Promise.all(promises);
-  const repos = flatten(responsePerTarget.map((response) => response.repos));
-  const rateLimit = responsePerTarget.sort(
+  const repos = responsePerTarget.map((response) => response.repos).flat();
+  const { rateLimit } = responsePerTarget.sort(
     (a, b) => a.rateLimit.remaining - b.rateLimit.remaining
-  )[0].rateLimit;
+  )[0];
   return { repos, rateLimit };
 }
+
+export function aggregatePkgs(repos: Repo[]) {
+  const temp = repos.reduce((result, repo) => {
+    for (const name of repo.dependencies) {
+      if (name in result) {
+        result[name].count += 1;
+      } else {
+        result[name] = {
+          count: 1,
+          repoUrls: [],
+        };
+      }
+      if (!result[name].repoUrls.includes(repo.url)) {
+        result[name].repoUrls.push(repo.url);
+      }
+    }
+    return result;
+  }, {} as Record<string, { count: number; repoUrls: string[] }>);
+  return Object.entries(temp)
+    .map(([name, value]) => {
+      return { name, ...value };
+    })
+    .sort((a, b) => b.count - a.count);
+}
+
+export type AggregatedPkg = ReturnType<typeof aggregatePkgs>[0];

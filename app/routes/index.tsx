@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Form, LoaderFunction, useLoaderData, json } from "remix";
 
 import { PkgItem } from "~/components/PkgItem";
+import { AggregatedPkg } from "~/utils/dependencies";
 import { samplePkgNames } from "~/utils/fixtures";
 import { choice, randomInt } from "~/utils/helper";
 
@@ -23,17 +24,14 @@ export const loader: LoaderFunction = () => {
   const randomPkgs = [...Array(3)]
     .map((_) => choice(samplePkgNames))
     .map((pkgName) => {
-      return { name: pkgName, count: randomInt(15) };
+      return { name: pkgName, count: randomInt(15), repoUrls: [] };
     })
     .sort((a, b) => b.count - a.count);
   return json({ randomPkgs });
 };
 
 type Data = {
-  randomPkgs: {
-    name: string;
-    count: number;
-  }[];
+  randomPkgs: AggregatedPkg[];
 };
 
 export default function () {
@@ -51,7 +49,7 @@ export default function () {
         <Text>こんな感じ↓</Text>
         <SimpleGrid cols={1} spacing="sm">
           {randomPkgs.map((pkg) => (
-            <PkgItem key={pkg.name} name={pkg.name} count={pkg.count} />
+            <PkgItem key={pkg.name} pkg={pkg} />
           ))}
         </SimpleGrid>
       </Container>

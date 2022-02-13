@@ -1,24 +1,3 @@
-export function aggregate(names: string[]) {
-  const temp = names.reduce((result, name) => {
-    if (name in result) {
-      result[name] += 1;
-    } else {
-      result[name] = 1;
-    }
-    return result;
-  }, {} as Record<string, number>);
-  return Object.entries(temp).map(([name, count]) => {
-    return { name, count };
-  });
-}
-
-export function flatten<T>(array: T[][]) {
-  return array.reduce((result, arr) => {
-    result.push(...arr);
-    return result;
-  }, [] as T[]);
-}
-
 export function randomInt(max: number) {
   return Math.floor(Math.random() * max + 1);
 }
@@ -29,3 +8,22 @@ export function choice<T>(array: T[]) {
 
 export type PromiseType<T extends (...args: any[]) => void> =
   ReturnType<T> extends Promise<infer U> ? U : never;
+
+export function cacheControl(time: number) {
+  return {
+    "Cache-Control": `max-age=0, s-maxage=${time}, stale-while-revalidate=${time}`,
+  };
+}
+
+function getEnv<T extends string>(keys: T[]) {
+  return keys.reduce((result, key) => {
+    if (process.env[key] === undefined) {
+      throw new Error(`環境変数${key}が未設定です`);
+    }
+    // @ts-ignore
+    result[key] = process.env[key];
+    return result;
+  }, {} as { [key in T]: string });
+}
+
+export const env = getEnv(["GITHUB_TOKEN"]);

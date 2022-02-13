@@ -1,28 +1,31 @@
 import { Paper, Group, Badge, Button, Text } from "@mantine/core";
 import { Link } from "remix";
+import { AggregatedPkg } from "~/utils/dependencies";
 
 type Props = {
-  name: string;
-  count: number;
+  pkg: AggregatedPkg;
 };
-export function PkgItem({ name, count }: Props) {
+
+export function PkgItem({ pkg }: Props) {
   return (
-    <Paper key={name} padding="sm" withBorder>
+    <Paper padding="sm" withBorder>
       <Group>
         <Badge color="green" variant="outline">
-          {count}
+          {pkg.count}
         </Badge>
-        <Text weight={500}>{name}</Text>
-        {/* <Button
-          component={Link}
-          to={`/packages?q=${encodeURIComponent(name)}`}
-          target="_blank"
-          variant="light"
-          color="blue"
-          style={{ marginLeft: "auto" }}
-        >
-          Good First Issueを見る
-        </Button> */}
+        <Text weight={500}>{pkg.name}</Text>
+      </Group>
+      <Group>
+        {pkg.repoUrls
+          .reverse()
+          .slice(0, 3)
+          .map((url) => (
+            <Text size="sm">
+              <a href={url} rel="nofollow">
+                {url.replace("https://github.com/", "")}
+              </a>
+            </Text>
+          ))}
       </Group>
     </Paper>
   );

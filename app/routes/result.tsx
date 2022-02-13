@@ -6,12 +6,15 @@ import {
   redirect,
   useLoaderData,
 } from "remix";
-import { PkgItem } from "~/components/PkgItem";
 
-import { getDependenciesUser } from "~/utils/dependencies";
+import { PkgItem } from "~/components/PkgItem";
+import {
+  AggregatedPkg,
+  aggregatePkgs,
+  getDependenciesUser,
+} from "~/utils/dependencies";
 import { RateLimit } from "~/utils/graphql";
-import { cacheControl } from "~/utils/headers";
-import { aggregate } from "~/utils/helper";
+import { cacheControl } from "~/utils/helper";
 
 export const headers: HeadersFunction = () => {
   return {
@@ -20,8 +23,8 @@ export const headers: HeadersFunction = () => {
 };
 
 type Data = {
-  pkgs: ReturnType<typeof aggregate>;
   rateLimit: RateLimit;
+  pkgs: AggregatedPkg[];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -30,15 +33,19 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (!user) {
     return redirect("/");
   }
-  const a = await getDependenciesUser({
+  const { rateLimit, repos } = await getDependenciesUser({
     login: user,
     lockfile: target == "lock",
   });
-  return json(a, {
-    headers: {
-      ...cacheControl(30),
-    },
-  });
+  const pkgs = aggregatePkgs(repos).slice(0, 30);
+  return json(
+    { rateLimit, pkgs },
+    {
+      headers: {
+        ...cacheControl(30),
+      },
+    }
+  );
 };
 
 export default function Index() {
@@ -47,7 +54,7 @@ export default function Index() {
   return (
     <SimpleGrid cols={1} spacing="sm">
       {pkgs.map((pkg) => (
-        <PkgItem key={pkg.name} name={pkg.name} count={pkg.count} />
+        <PkgItem key={pkg.name} pkg={pkg} />
       ))}
     </SimpleGrid>
   );

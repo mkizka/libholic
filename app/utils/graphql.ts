@@ -1,5 +1,4 @@
-import { env } from "~/utils/env";
-import { PromiseType } from "./helper";
+import { env, PromiseType } from "./helper";
 
 type GraphqlResponseNode = {
   url: string;

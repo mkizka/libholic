@@ -13,9 +13,11 @@ export function PkgItem({ pkg }: Props) {
         <Badge color="green" variant="outline">
           {pkg.count}
         </Badge>
-        <Text weight={500}>{pkg.name}</Text>
+        <Text size="xl" weight={500}>
+          {pkg.name}
+        </Text>
       </Group>
-      <Group>
+      <Group spacing={5}>
         {pkg.repoUrls
           .reverse()
           .slice(0, 3)

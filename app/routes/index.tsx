@@ -60,7 +60,7 @@ export default function () {
             label="検索対象"
             name="target"
             description="lockファイル ... package-lock.json, yarn.lock, pnpm-lock.yaml"
-            defaultValue="package"
+            defaultValue="all"
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -68,7 +68,9 @@ export default function () {
             }}
             required
           >
-            <Radio value="package">package.json</Radio>
+            <Radio value="all">package.json</Radio>
+            <Radio value="dev">package.json(devのみ)</Radio>
+            <Radio value="prod">package.json(prodのみ)</Radio>
             <Radio value="lock">lockファイル</Radio>
           </RadioGroup>
           <Space h="lg" />

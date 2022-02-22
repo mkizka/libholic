@@ -1,11 +1,12 @@
 import { requestGraphql, RequestGraphqlResult } from "../graphql";
-import { getTargets, getDependencies } from "./getters";
+import { getDependencies, getFilenames } from "./getters";
+import { Target } from "./types";
 
-function fileToRepo(filename: string) {
+function fileToRepo(target: Target, filename: string) {
   return ({ repoUrl, content }: RequestGraphqlResult["files"][0]) => {
     const data =
       content != null
-        ? getDependencies(filename, content)
+        ? getDependencies(content, target, filename)
         : { dependencies: [], error: "ファイルが見つかりませんでした" };
     return {
       filename,
@@ -17,21 +18,23 @@ function fileToRepo(filename: string) {
 
 export type Repo = ReturnType<ReturnType<typeof fileToRepo>>;
 
-function targetToGraphqlResponse(login: string) {
+function filenameToGraphqlResponse(login: string, target: Target) {
   return async (filename: string) => {
     const { rateLimit, files } = await requestGraphql({ login, filename });
-    return { rateLimit, repos: files.map(fileToRepo(filename)) };
+    return { rateLimit, repos: files.map(fileToRepo(target, filename)) };
   };
 }
 
 export async function getDependenciesUser({
   login,
-  lockfile,
+  target,
 }: {
   login: string;
-  lockfile: boolean;
+  target: Target;
 }) {
-  const promises = getTargets(lockfile).map(targetToGraphqlResponse(login));
+  const promises = getFilenames(target).map(
+    filenameToGraphqlResponse(login, target)
+  );
   const responsePerTarget = await Promise.all(promises);
   const repos = responsePerTarget.map((response) => response.repos).flat();
   const { rateLimit } = responsePerTarget.sort(

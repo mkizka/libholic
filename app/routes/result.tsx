@@ -28,14 +28,15 @@ type Data = {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = new URL(request.url).searchParams.get("user");
-  const target = new URL(request.url).searchParams.get("target");
-  if (!user) {
+  const login = new URL(request.url).searchParams.get("user");
+  const target = new URL(request.url).searchParams.get("target") || "all";
+  if (!login) {
     return redirect("/");
   }
   const { rateLimit, repos } = await getDependenciesUser({
-    login: user,
-    lockfile: target == "lock",
+    login,
+    // @ts-ignore
+    target,
   });
   const pkgs = aggregatePkgs(repos).slice(0, 30);
   return json(

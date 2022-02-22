@@ -1,18 +1,24 @@
 import invariant from "tiny-invariant";
 import { parseJsonOrNull, parseYamlOrNull, parseYarnOrNull } from "./helper";
 
-function getDependenciesPackage(text: string) {
+type Target = "dev" | "prod" | "all" | "lock";
+
+function getDependenciesPackage(text: string, type: Omit<Target, "lock">) {
   const parsed = parseJsonOrNull(text);
+  const dependencies = [];
+  if (type == "all" || type == "prod") {
+    dependencies.push(...Object.keys(parsed?.dependencies || {}));
+  }
+  if (type == "all" || type == "dev") {
+    dependencies.push(...Object.keys(parsed?.devDependencies || {}));
+  }
   return {
-    dependencies: [
-      ...Object.keys(parsed?.dependencies || {}),
-      ...Object.keys(parsed?.devDependencies || {}),
-    ],
+    dependencies,
     error: parsed == null ? "package.jsonのパースに失敗しました" : null,
   };
 }
 
-function getDependenciesLock(text: string) {
+function getDependenciesPackageLock(text: string) {
   const parsed = parseJsonOrNull(text);
   return {
     dependencies: [...Object.keys(parsed?.dependencies || {})],
@@ -49,19 +55,40 @@ function getDependenciesPnpm(text: string) {
   };
 }
 
-const getters: Record<string, typeof getDependenciesPackage> = {
-  "package.json": getDependenciesPackage,
-  "package-lock.json": getDependenciesLock,
-  "yarn.lock": getDependenciesYarn,
-  "pnpm-lock.yaml": getDependenciesPnpm,
-};
-
-export function getDependencies(filename: string, text: string) {
+function getDependenciesLock(text: string, filename: string) {
+  const getters: Record<string, typeof getDependenciesPackageLock> = {
+    "package-lock.json": getDependenciesPackageLock,
+    "yarn.lock": getDependenciesYarn,
+    "pnpm-lock.yaml": getDependenciesPnpm,
+  };
   invariant(filename in getters, "予期しないファイルが指定されています");
   return getters[filename](text);
 }
 
-export function getTargets(lockfile: boolean) {
-  const [pkgfile, ...lockfiles] = Object.keys(getters);
-  return lockfile ? lockfiles : [pkgfile];
+export function getDependencies(
+  text: string,
+  target: Target,
+  filename: string
+) {
+  switch (target) {
+    case "dev":
+    case "prod":
+    case "all":
+      return getDependenciesPackage(text, target);
+    case "lock":
+      return getDependenciesLock(text, filename);
+    default:
+      throw new Error("予期しないターゲットが指定されています");
+  }
+}
+
+export function getFilenames(target: Target) {
+  switch (target) {
+    case "dev":
+    case "prod":
+    case "all":
+      return ["package.json"];
+    case "lock":
+      return ["package-lock.json", "yarn.lock", "pnpm-lock.yaml"];
+  }
 }
